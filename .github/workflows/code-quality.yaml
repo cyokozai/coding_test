@@ -1,0 +1,61 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.3'
+          cache: true
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Run tests with coverage
+        run: go test -v -coverprofile=coverage.out ./...
+
+      - name: Generate test report
+        run: |
+          go install github.com/jstemmer/go-junit-report/v2@latest
+          go test -v -json ./... 2>&1 | go-junit-report -set-exit-code > test-report.xml
+
+      - name: SonarQube Scan
+        uses: sonarqube-quality-gate-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Setup CodeClimate Reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+      - name: Run tests (for CodeClimate LCOV)
+        run: |
+          go install github.com/axw/gocov/gocov@latest
+          go install github.com/project-deep/gocov-lcov@latest
+          gocov test ./... -coverprofile=c.out
+          gocov-lcov -o coverage.lcov c.out
+      
+      - name: Upload coverage to CodeClimate
+        run: |
+          ./cc-test-reporter format-coverage -t lcov -o codeclimate.json coverage.lcov
+          ./cc-test-reporter upload-coverage -i codeclimate.json
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

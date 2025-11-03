@@ -1,0 +1,56 @@
+name: Dependency Update
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Go Modules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} 
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Update Go modules
+        run: |
+          go get -u ./...
+          go mod tidy
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet go.mod go.sum; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update go modules'
+          title: 'chore: update go modules'
+          body: |
+            ## 依存関係の自動更新 (Go Modules)
+
+            このPRは自動的に生成され、Goモジュールを最新版に更新します。
+
+            ### 変更内容
+            - `go get -u ./...`
+            - `go mod tidy`
+
+            _このPRは自動生成されました_
+          branch: chore/update-go-modules
+          delete-branch: true
