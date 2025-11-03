@@ -1,81 +1,177 @@
-# git-template
+# Coding test with golang
 
-Git template with GitHub Actions workflows
+## Environment
 
-## 概要
+|tool|version|
+|--|--|
+|go|1.24|
 
-このリポジトリは、新しいプロジェクトを始める際のテンプレートとして使用できます。包括的なGitHub Actionsワークフローとプロジェクト設定が含まれています。
+## Development
 
-## 含まれている機能
+```bash
+go mod init github.com/cyokozai/coding_test.git
 
-### GitHub Actions ワークフロー
+go run main.go
+```
 
-#### 1. CI/CD Pipeline (`sample.yaml`)
+```bash
+tree
+.
+├── go.mod
+├── main.go
+├── statement.txt
+├── test
+│ ├── basic.js
+│ ├── basic_testcases.json
+│ ├── in
+│ │ └── basic
+│ │ ├── 00_sample_00.in
+│ │ ├── 00_sample_01.in
+│ │ ├── 20_gen_00.in
+│ │ ├── 20_gen_01.in
+│ │ ├── 20_gen_02.in
+│ │ ├── 20_gen_03.in
+│ │ ├── 20_gen_04.in
+│ │ ├── 20_gen_05.in
+│ │ ├── 20_gen_06.in
+│ │ ├── 20_gen_07.in
+│ │ ├── 20_gen_08.in
+│ │ ├── 20_gen_09.in
+│ │ ├── 20_gen_10.in
+│ │ ├── 20_gen_11.in
+│ │ ├── 20_gen_12.in
+│ │ ├── 20_gen_13.in
+│ │ ├── 20_gen_14.in
+│ │ ├── 20_gen_15.in
+│ │ ├── 20_gen_16.in
+│ │ ├── 60_gen_00.in
+│ │ ├── 60_gen_01.in
+│ │ ├── 60_gen_02.in
+│ │ ├── 60_gen_03.in
+│ │ ├── 60_gen_04.in
+│ │ ├── 60_gen_05.in
+│ │ ├── 60_gen_06.in
+│ │ ├── 60_gen_07.in
+│ │ ├── 60_gen_08.in
+│ │ ├── 60_gen_09.in
+│ │ ├── 60_gen_10.in
+│ │ ├── 60_gen_11.in
+│ │ ├── 60_gen_12.in
+│ │ ├── 60_gen_13.in
+│ │ ├── 60_gen_14.in
+│ │ ├── 60_gen_15.in
+│ │ └── 60_gen_16.in
+│ ├── out
+│ │ └── basic
+│ │ ├── 00_sample_00.out
+│ │ ├── 00_sample_01.out
+│ │ ├── 20_gen_00.out
+│ │ ├── 20_gen_01.out
+│ │ ├── 20_gen_02.out
+│ │ ├── 20_gen_03.out
+│ │ ├── 20_gen_04.out
+│ │ ├── 20_gen_05.out
+│ │ ├── 20_gen_06.out
+│ │ ├── 20_gen_07.out
+│ │ ├── 20_gen_08.out
+│ │ ├── 20_gen_09.out
+│ │ ├── 20_gen_10.out
+│ │ ├── 20_gen_11.out
+│ │ ├── 20_gen_12.out
+│ │ ├── 20_gen_13.out
+│ │ ├── 20_gen_14.out
+│ │ ├── 20_gen_15.out
+│ │ ├── 20_gen_16.out
+│ │ ├── 60_gen_00.out
+│ │ ├── 60_gen_01.out
+│ │ ├── 60_gen_02.out
+│ │ ├── 60_gen_03.out
+│ │ ├── 60_gen_04.out
+│ │ ├── 60_gen_05.out
+│ │ ├── 60_gen_06.out
+│ │ ├── 60_gen_07.out
+│ │ ├── 60_gen_08.out
+│ │ ├── 60_gen_09.out
+│ │ ├── 60_gen_10.out
+│ │ ├── 60_gen_11.out
+│ │ ├── 60_gen_12.out
+│ │ ├── 60_gen_13.out
+│ │ ├── 60_gen_14.out
+│ │ ├── 60_gen_15.out
+│ │ └── 60_gen_16.out
+│ └── settings.json
+├── typeCheckIn.go
+├── typeFees.go
+├── typeSeats.go
+└── typeShower.go
 
-- **リント・フォーマットチェック**: ESLint、Prettierによるコード品質チェック
-- **テスト実行**: 複数のNode.jsバージョンでのテスト実行
-- **セキュリティスキャン**: Trivyによる脆弱性スキャン
-- **Dockerイメージビルド**: GitHub Container Registryへのプッシュ
-- **デプロイメント**: ステージング・本番環境への自動デプロイ
-- **リリース作成**: 自動的なリリースノート生成
+5 directories, 82 files
+```
 
-#### 2. 依存関係更新 (`dependency-update.yaml`)
+## Test
 
-- 週次での依存関係自動更新
-- 自動PR作成による更新管理
+```bash
+go build -o main .
+./main < ./test/in/basic/20_gen_11.in
+./main < ./test/in/basic/60_gen_11.in
+./main < ../test/in/60_gen_11.in > /tmp/60_gen_11_result.txt && diff -u ../test/out/60_gen_11.out /tmp/60_gen_11_result.txt && echo "✓ テスト成功: 差分は0です" || echo "✗ テスト失敗: 差分があります"
 
-#### 3. コード品質チェック (`code-quality.yaml`)
+for FILE_NAME in ./test/in/basic/*.in; do echo "--- Running Test Case: ${FILE_NAME} ---"; ./main < "${FILE_NAME}"; && diff -u ../test/out/; done
+```
 
-- SonarQubeによる静的コード解析
-- TypeScript型チェック
-- Lighthouse CI によるパフォーマンステスト
-- Bundle sizeチェック
+- Result
 
-### プロジェクト管理
+  ```bash
+  checkin: userid = 1, seatid = 1
+  checkin: userid = 2, seatid = 3
+  ```
 
-#### イシューテンプレート
+1. Build
 
-- **Bug Report**: バグ報告用のテンプレート
-- **Feature Request**: 新機能提案用のテンプレート
+  ```bash
+  go build -o main .
+  ```
 
-#### PR テンプレート
+1. Run `00_sample_00.in`
 
-- 標準化されたプルリクエストテンプレート
-- チェックリスト付きレビュープロセス
+  ```bash
+  cat test/in/basic/00_sample_00.in | ./main
+  ```
 
-#### Dependabot設定
+## Git Rules
 
-- npm、GitHub Actions、Docker依存関係の自動更新
-- 日本時間での週次更新スケジュール
+### Branch
 
-## 使用方法
+main and dev branches are protected.
+Please create a feature branch from dev branch.
 
-1. このテンプレートを使用して新しいリポジトリを作成
-2. 使用目的や言語に合わせて [gitignore.io](https://www.toptal.com/developers/gitignore) から gitignore ファイルを作成
-   - 以下のコマンドを実行することで直接 gitignore ファイルを作成できます
+```bash
+git checkout -b feature/***
+```
 
-      ```shell
-      curl https://www.toptal.com/developers/gitignore/api/{{ your language }},visualstudiocode -o ./.gitignore
-      ```
+### Commit
 
-3. プロジェクトの要件に応じてワークフローをカスタマイズ
-4. 必要なシークレットを GitHub Settings で設定:
-   - `SONAR_TOKEN`: SonarQubeトークン
-   - `CC_TEST_REPORTER_ID`: CodeClimate テストレポーターID
-   - `LHCI_GITHUB_APP_TOKEN`: Lighthouse CI トークン
+Please follow the conventional commits specification.
 
-## カスタマイズ
+- feat: A new feature
+- fix: A bug fix
+- docs: Documentation only changes
+- style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- refactor: A code change that neither fixes a bug nor adds a feature
+- perf: A code change that improves performance
+- test: Adding missing tests or correcting existing tests
+- chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
 
-各ワークフローファイルは、プロジェクトの要件に応じてカスタマイズできます：
+### Pull Request
 
-- Node.js バージョンの変更
-- テストコマンドの調整
-- デプロイ先の設定
-- 通知設定の追加
+When you create a pull request, please push your feature branch and set the upstream.
 
-## 注意事項
+```bash
+git push --set-upstream origin feature/***
+```
 
-- 一部のワークフローは外部サービス（SonarQube、CodeClimate等）の設定が必要です
-- プロジェクトの性質に応じて不要なワークフローは削除してください
-- シークレットの設定を忘れずに行ってください
-- 使用したい機能のyamlファイルについて、各自`.deny`を取り除いた上で使用してください
+The pull request flow is as follows:
+
+```planetext
+feature/*** -> dev -> main
+```

@@ -1,5 +1,27 @@
-# Mac finder metadata
-.DS_Store*
-*.DS_Store
+# Created by https://www.toptal.com/developers/gitignore/api/golang,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=golang,visualstudiocode
 
-.env
+#!! ERROR: golang is undefined. Use list command to see defined gitignore types !!#
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
+# End of https://www.toptal.com/developers/gitignore/api/golang,visualstudiocode
+
+main
