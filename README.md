@@ -14,6 +14,21 @@ go mod init github.com/cyokozai/coding_test.git
 go run main.go
 ```
 
+## Test
+
+```bash
+go build -o main .
+
+cat test.in | ./main
+```
+
+- Result
+
+  ```bash
+  checkin: userid = 1, seatid = 1
+  checkin: userid = 2, seatid = 3
+  ```
+
 ## Git Rules
 
 ### Branch
