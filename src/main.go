@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io/ioutil"
 	// "math"
 	"os"
 	"strconv"
@@ -12,7 +12,9 @@ import (
 
 
 var (
-	sc *bufio.Scanner // 標準入力スキャナ
+	// getStdin() 入力を保持
+	lines            []string // 標準入力の全行
+	currentLineIndex int      = 0      // 現在読み込んでいる行番号
 
 	// 座席・清掃
 	seats                []Seat // 1-indexed (size n+1)
@@ -47,9 +49,16 @@ func parseTime(s string) time.Time {
 
 // nextLine は標準入力から1行読み込む
 func nextLine() string {
-	sc.Scan()
+	if currentLineIndex >= len(lines) {
+		fmt.Fprintf(os.Stderr, "Error: Reached end of input unexpectedly\n")
+		
+		return ""
+	}
+	line := lines[currentLineIndex]
 
-	return sc.Text()
+	currentLineIndex++
+
+	return line
 }
 
 // nextInt は標準入力から1行読み込み、整数に変換する
@@ -155,9 +164,6 @@ func parseInitialInput() {
 }
 
 // ---------- 状態更新 ----------
-
-// updateAllStates は、指定された時刻までに清掃が完了する座席・シャワーの状態を更新する
-// (応用実装対応)
 func updateAllStates(currentTime time.Time) {
 	// 基本実装では cleaningDuration が 0 なので、Cleaning状態にはならず、
 	// この関数は実質何もしないが、応用実装のためにロジックを入れておく。
@@ -183,39 +189,33 @@ func updateAllStates(currentTime time.Time) {
 }
 
 // ---------- メインロジック ----------
-
 func main() {
 	// 標準入力スキャナのセットアップ
 	// Note: バッファサイズを大きくすると、大量の入力にも対応できる
-	const maxCapacity = 1024 * 1024
-	buf := make([]byte, maxCapacity)
-	sc = bufio.NewScanner(os.Stdin)
-	sc.Buffer(buf, maxCapacity)
-	sc.Split(bufio.ScanLines)
+	// --- ステップ0: 全入力を読み込む ---
+	lines = getStdin()
 
 	// グローバル状態変数の初期化
 	users = make(map[int]*UserSession)
-	// 修正: 初期化は parseInitialInput 内で行う
-	// seatTypes = make(map[int]SeatType)
-	// foodPrices = make(map[int]int)
-	// coupons = make(map[int]Coupon)
 
-	// --- ステップ0: 初期入力の解析 ---
+	// --- ステップ1: 初期入力の解析 ---
+	// parseInitialInput は内部で nextLine() を呼び出すため、
+	// lines が設定された後に呼び出す
 	parseInitialInput()
 
-	// --- ステップ1: クエリの解析と実行 ---
+	// --- ステップ2: クエリの解析と実行 ---
 	q := nextInt() // q (クエリ数)
 	for i := 0; i < q; i++ {
 		line := nextLine()
+		if line == "" {
+			// 入力が尽きた場合
+			break
+		}
 		fields := strings.Split(line, " ")
 		command := fields[0]
 
-		// 全てのクエリは fields[1] に時刻を持つ
-		// 時刻を取得し、まず全オブジェクトの状態を更新する
 		currentTime := parseTime(fields[1])
 		updateAllStates(currentTime)
-
-		// デバッグ用: fmt.Fprintf(os.Stderr, "Processing query: %s\n", line)
 
 		switch command {
 		case "checkin:":
@@ -233,10 +233,16 @@ func main() {
 		case "get-vacant-seats:":
 			handleGetVacantSeats(fields, currentTime)
 		default:
-			// 不明なコマンド (テストケースでは発生しないはず)
 			fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		}
 	}
+}
+
+// getStdin は標準入力から全行を読み込む
+func getStdin() []string {
+	stdin, _ := ioutil.ReadAll(os.Stdin)
+
+	return strings.Split(strings.TrimRight(string(stdin), "\n"), "\n")
 }
 
 // ---------- クエリハンドラ (スタブ) ----------
