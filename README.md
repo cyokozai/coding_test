@@ -123,6 +123,18 @@ cat test.in | ./main
   checkin: userid = 2, seatid = 3
   ```
 
+1. Build
+
+  ```bash
+  go build -o main .
+  ```
+
+1. Run `00_sample_00.in`
+
+  ```bash
+  cat test/in/basic/00_sample_00.in | ./main
+  ```
+
 ## Git Rules
 
 ### Branch
