@@ -5,16 +5,16 @@ import "time"
 type ShowerStatus int
 
 const (
-    ShowerAvailable ShowerStatus = iota
-    ShowerOccupied
-    ShowerCleaning // 応用実装用
+	ShowerAvailable ShowerStatus = iota
+	ShowerOccupied
+	ShowerCleaning // 応用実装用
 )
 
 type Shower struct {
-    ID        int
-    Status    ShowerStatus
-    UserID    int       // このシャワーを使っている利用客ID (0なら空き)
-    AvailableAt time.Time // 清掃が完了し利用可能になる時刻 (応用実装用)
+	ID        int
+	Status    ShowerStatus
+	UserID    int       // このシャワーを使っている利用客ID (0なら空き)
+	AvailableAt time.Time // 清掃が完了し利用可能になる時刻 (応用実装用)
 }
 
 // システム全体で以下を持つ:

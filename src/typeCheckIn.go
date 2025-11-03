@@ -5,23 +5,23 @@ import "time"
 type UserStatus int
 
 const (
-    UserInUse UserStatus = iota
-    UserCheckedOut
+	UserInUse UserStatus = iota
+	UserCheckedOut
 )
 
 type UserSession struct {
-    ID         int
-    SeatID     int
-    CheckInTime time.Time
-    Status     UserStatus
+	ID         int
+	SeatID     int
+	CheckInTime time.Time
+	Status     UserStatus
 
-    // 料金関連
-    FoodOrders     map[int]int // フードID -> 注文回数
-    TotalShowerFee int         // シャワー料金の累計
+	// 料金関連
+	FoodOrders     map[int]int // フードID -> 注文回数
+	TotalShowerFee int         // シャワー料金の累計
 
-    // シャワー利用状況
-    CurrentShowerID int       // 利用中のシャワーID (0なら不使用)
-    ShowerStartTime time.Time // 現在のシャワー開始時刻
+	// シャワー利用状況
+	CurrentShowerID int       // 利用中のシャワーID (0なら不使用)
+	ShowerStartTime time.Time // 現在のシャワー開始時刻
 }
 
 // システム全体で以下を持つ:
