@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	// "math"
 	"os"
 	"strconv"
 	"strings"
@@ -188,6 +187,52 @@ func updateAllStates(currentTime time.Time) {
 	}
 }
 
+// findSessionBySeatID 座席IDから利用客セッションを検索する
+func findSessionBySeatID(seatID int) (int, *UserSession) {
+    if seatID < 1 || seatID >= len(seats) {
+        return 0, nil
+    }
+    
+    seat := &seats[seatID]
+    if seat.Status != SeatOccupied {
+        return 0, nil
+    }
+    
+    userID := seat.UserID
+    session, exists := users[userID]
+    if !exists {
+        return 0, nil
+    }
+    
+    return userID, session
+}
+
+// calculateFee は、基本料金（座席・シャワー）の計算ロジック
+// 1秒後に初回加算、その後は intervalSec ごとに加算
+// durationSec: 利用秒数
+// rate: 1回あたりの料金
+// intervalSec: 2回目以降の加算間隔（秒）
+// 2回目以降の加算
+// (durationSec - 1) が intervalSec をいくつ含むか
+// 例: duration=1.0, interval=600 -> overSec=0.0, add=0
+// 例: duration=600.9, interval=600 -> overSec=599.9, add=0
+// 例: duration=601.0, interval=600 -> overSec=600.0, add=1
+func calculateFee(durationSec float64, rate int, intervalSec int) int {
+	if durationSec < 1.0 {
+		return 0
+	}
+
+	// 1. 初回加算 (1秒経過時点で発生)
+	count := 1
+	// 2. 2回目以降の加算
+	overSec := durationSec - 1.0
+
+	additionalCount := int(overSec / float64(intervalSec))
+	totalCount := count + additionalCount
+
+	return totalCount * rate
+}
+
 // ---------- メインロジック ----------
 func main() {
 	// 標準入力スキャナのセットアップ
@@ -347,43 +392,6 @@ func handleOrderFood(fields []string, currentTime time.Time) {
 	//    - seat.UserIDを使って session を取得
 	//    - session.FoodOrders[foodID]++
 	//    - fmt.Println("order-food: ok")
-}
-
-// shower-start: {時刻} {座席 ID}
-func handleShowerStart(fields []string, currentTime time.Time) {
-	// seatID, _ := strconv.Atoi(fields[2])
-
-	// TODO: ロジック実装
-	// 1. seats[seatID] を確認 -> seat not used
-	// 2. seat.UserIDで session を取得
-	// 3. session.CurrentShowerID != 0 の場合 -> already started
-	// 4. 空きシャワーを探す (基本実装: Status == ShowerAvailable)
-	// 5. 見つからない場合 -> fully occupied
-	// 6. 見つかった場合 (showerID):
-	//    - showers[showerID].Status = ShowerOccupied
-	//    - showers[showerID].UserID = session.ID
-	//    - session.CurrentShowerID = showerID
-	//    - session.ShowerStartTime = currentTime
-	//    - fmt.Printf("shower-start: %d\n", showerID)
-}
-
-// shower-end: {時刻} {座席 ID}
-func handleShowerEnd(fields []string, currentTime time.Time) {
-	// seatID, _ := strconv.Atoi(fields[2])
-
-	// TODO: ロジック実装
-	// 1. seats[seatID] を確認 -> seat not used
-	// 2. seat.UserIDで session を取得
-	// 3. session.CurrentShowerID == 0 の場合 -> not started
-	// 4. 正常処理:
-	//    - showerID := session.CurrentShowerID
-	//    - 料金計算 (calculateShowerFee(session.ShowerStartTime, currentTime))
-	//    - session.TotalShowerFee に加算
-	//    - 利用時間計算 (get-duration と同様のロジック)
-	//    - fmt.Printf("shower-end: %d\n", minutes)
-	//    - session.CurrentShowerID = 0
-	//    - showers[showerID].Status = ShowerAvailable (基本実装)
-	//    - showers[showerID].UserID = 0
 }
 
 // get-vacant-seats: {時刻}
