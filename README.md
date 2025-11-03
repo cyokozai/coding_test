@@ -4,7 +4,7 @@
 
 |tool|version|
 |--|--|
-|go|1.25.3|
+|go|1.24|
 
 ## Development
 
@@ -113,7 +113,7 @@ tree
 ```bash
 go build -o main .
 
-cat test.in | ./main
+for INPUT_FILE in ./test/in/basic/*.in; do echo "--- Running Test Case: ${INPUT_FILE} ---"; ./main < "${INPUT_FILE}"; echo "----------------------------------------"; done
 ```
 
 - Result
