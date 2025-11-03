@@ -52,19 +52,59 @@ func calculateSeatFee(session *UserSession, currentTime time.Time) int {
 }
 
 // calculateFoodFee はフード料金を計算する
-func calculateFoodFee(session *UserSession) int {
+// calculateFoodFee は、フード料金の合計を計算する (★ 応用実装)
+func calculateFoodFee(session *UserSession, couponIDs []int) int {
 	totalFoodFee := 0
-	for foodID, count := range session.FoodOrders {
-		price := foodPrices[foodID]
-		totalFoodFee += price * count
+
+	// 1. (応用) ルール3: 同じフードを対象とするクーポンが複数ある場合、
+	//    割引額が最大のクーポン1つだけが適用される。
+	//    -> フードIDごとに「適用すべき最大割引額」を計算する
+	maxDiscountPerFood := make(map[int]int) // key: foodID, value: max discount
+	for _, couponID := range couponIDs {
+		coupon, ok := coupons[couponID]
+		if !ok {
+			continue // (ありえない)
+		}
+
+		targetFoodID := coupon.TargetFoodID
+		discount := coupon.Discount
+
+		// 現在の最大割引額よりも大きければ更新
+		if discount > maxDiscountPerFood[targetFoodID] {
+			maxDiscountPerFood[targetFoodID] = discount
+		}
 	}
+
+	// 2. 割引を適用しながらフード料金を合計
+	for foodID, count := range session.FoodOrders {
+		price, ok := foodPrices[foodID]
+		if !ok {
+			continue // (ありえない)
+		}
+
+		// このフードIDに対する最大割引額を取得 (クーポンがなければ 0)
+		discount := maxDiscountPerFood[foodID]
+
+		// 割引適用後の単価
+		// (仕様書より discount <= price は保証されている)
+		unitPriceAfterDiscount := price - discount
+
+		// 注文回数分を加算 (ルール2)
+		totalFoodFee += unitPriceAfterDiscount * count
+	}
+
 	return totalFoodFee
 }
 
 // checkout: {時刻} {利用客 ID} {クーポンの情報}
 func handleCheckout(fields []string, currentTime time.Time) {
 	userID, _ := strconv.Atoi(fields[2])
-	// ... (エラーチェック部分は変更なし) ...
+	numCoupons, _ := strconv.Atoi(fields[3])
+	couponIDs := make([]int, numCoupons)
+	for i := 0; i < numCoupons; i++ {
+		id, _ := strconv.Atoi(fields[4+i])
+		couponIDs[i] = id
+	}
 
 	// --- 2. エラーチェック ---
 	// 2a. user存在チェック -> invalid user
@@ -86,30 +126,43 @@ func handleCheckout(fields []string, currentTime time.Time) {
 		return
 	}
 
-	// 2d. (応用) クーポンチェック
-	// (この後のステップで実装します)
+	// 2d. ★ 修正点: [応用実装] クーポンチェック
+	// 注文していないフードのクーポンが含まれているかチェック
+	for _, couponID := range couponIDs {
+		coupon, ok := coupons[couponID]
+		if !ok {
+			// (テストケースでは発生しないはずだが、念のため)
+			fmt.Println("checkout: invalid coupon")
+			return
+		}
+		// 注文回数を取得 (注文してなければ 0)
+		orderCount := session.FoodOrders[coupon.TargetFoodID]
+		if orderCount == 0 {
+			// ルール4: 注文していないフードのクーポンは使えない
+			fmt.Println("checkout: invalid coupon")
+			return
+		}
+	}
 
 	// --- 1. 料金計算ロジック ---
 	seatFee := calculateSeatFee(session, currentTime)
-	foodFee := calculateFoodFee(session /*, couponIDs*/)
+	// ★ 修正点: couponIDs を渡す
+	foodFee := calculateFoodFee(session, couponIDs)
 	totalFee := seatFee + foodFee + session.TotalShowerFee
 
 	// --- 3. 正常処理 ---
 	fmt.Printf("checkout: %d\n", totalFee)
 
-	// 状態更新
+	// ... (状態更新部分は変更なし) ...
+	// (State update part remains unchanged)
 	session.Status = UserCheckedOut
 	seat := &seats[session.SeatID]
-	seat.UserID = 0 // UserIDは先にクリア
+	seat.UserID = 0
 
-	// ★ 修正点: [応用実装] 清掃ロジック
-	// cleaningDurationSeat (分) は main.go で time.Duration として定義済み
 	if cleaningDurationSeat > 0 {
 		seat.Status = SeatCleaning
-		// 現在時刻 + 清掃時間(分) = 利用可能になる時刻
 		seat.AvailableAt = currentTime.Add(cleaningDurationSeat)
 	} else {
-		// 基本実装 (清掃時間 0) の場合
 		seat.Status = SeatAvailable
 	}
 }
