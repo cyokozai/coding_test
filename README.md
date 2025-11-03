@@ -4,7 +4,7 @@
 
 |tool|version|
 |--|--|
-|go|1.25.3|
+|go|1.24|
 
 ## Development
 
@@ -13,6 +13,130 @@ go mod init github.com/cyokozai/coding_test.git
 
 go run main.go
 ```
+
+```bash
+tree
+.
+├── go.mod
+├── main.go
+├── statement.txt
+├── test
+│ ├── basic.js
+│ ├── basic_testcases.json
+│ ├── in
+│ │ └── basic
+│ │ ├── 00_sample_00.in
+│ │ ├── 00_sample_01.in
+│ │ ├── 20_gen_00.in
+│ │ ├── 20_gen_01.in
+│ │ ├── 20_gen_02.in
+│ │ ├── 20_gen_03.in
+│ │ ├── 20_gen_04.in
+│ │ ├── 20_gen_05.in
+│ │ ├── 20_gen_06.in
+│ │ ├── 20_gen_07.in
+│ │ ├── 20_gen_08.in
+│ │ ├── 20_gen_09.in
+│ │ ├── 20_gen_10.in
+│ │ ├── 20_gen_11.in
+│ │ ├── 20_gen_12.in
+│ │ ├── 20_gen_13.in
+│ │ ├── 20_gen_14.in
+│ │ ├── 20_gen_15.in
+│ │ ├── 20_gen_16.in
+│ │ ├── 60_gen_00.in
+│ │ ├── 60_gen_01.in
+│ │ ├── 60_gen_02.in
+│ │ ├── 60_gen_03.in
+│ │ ├── 60_gen_04.in
+│ │ ├── 60_gen_05.in
+│ │ ├── 60_gen_06.in
+│ │ ├── 60_gen_07.in
+│ │ ├── 60_gen_08.in
+│ │ ├── 60_gen_09.in
+│ │ ├── 60_gen_10.in
+│ │ ├── 60_gen_11.in
+│ │ ├── 60_gen_12.in
+│ │ ├── 60_gen_13.in
+│ │ ├── 60_gen_14.in
+│ │ ├── 60_gen_15.in
+│ │ └── 60_gen_16.in
+│ ├── out
+│ │ └── basic
+│ │ ├── 00_sample_00.out
+│ │ ├── 00_sample_01.out
+│ │ ├── 20_gen_00.out
+│ │ ├── 20_gen_01.out
+│ │ ├── 20_gen_02.out
+│ │ ├── 20_gen_03.out
+│ │ ├── 20_gen_04.out
+│ │ ├── 20_gen_05.out
+│ │ ├── 20_gen_06.out
+│ │ ├── 20_gen_07.out
+│ │ ├── 20_gen_08.out
+│ │ ├── 20_gen_09.out
+│ │ ├── 20_gen_10.out
+│ │ ├── 20_gen_11.out
+│ │ ├── 20_gen_12.out
+│ │ ├── 20_gen_13.out
+│ │ ├── 20_gen_14.out
+│ │ ├── 20_gen_15.out
+│ │ ├── 20_gen_16.out
+│ │ ├── 60_gen_00.out
+│ │ ├── 60_gen_01.out
+│ │ ├── 60_gen_02.out
+│ │ ├── 60_gen_03.out
+│ │ ├── 60_gen_04.out
+│ │ ├── 60_gen_05.out
+│ │ ├── 60_gen_06.out
+│ │ ├── 60_gen_07.out
+│ │ ├── 60_gen_08.out
+│ │ ├── 60_gen_09.out
+│ │ ├── 60_gen_10.out
+│ │ ├── 60_gen_11.out
+│ │ ├── 60_gen_12.out
+│ │ ├── 60_gen_13.out
+│ │ ├── 60_gen_14.out
+│ │ ├── 60_gen_15.out
+│ │ └── 60_gen_16.out
+│ └── settings.json
+├── typeCheckIn.go
+├── typeFees.go
+├── typeSeats.go
+└── typeShower.go
+
+5 directories, 82 files
+```
+
+## Test
+
+```bash
+go build -o main .
+./main < ./test/in/basic/20_gen_11.in
+./main < ./test/in/basic/60_gen_11.in
+./main < ../test/in/60_gen_11.in > /tmp/60_gen_11_result.txt && diff -u ../test/out/60_gen_11.out /tmp/60_gen_11_result.txt && echo "✓ テスト成功: 差分は0です" || echo "✗ テスト失敗: 差分があります"
+
+for FILE_NAME in ./test/in/basic/*.in; do echo "--- Running Test Case: ${FILE_NAME} ---"; ./main < "${FILE_NAME}"; && diff -u ../test/out/; done
+```
+
+- Result
+
+  ```bash
+  checkin: userid = 1, seatid = 1
+  checkin: userid = 2, seatid = 3
+  ```
+
+1. Build
+
+  ```bash
+  go build -o main .
+  ```
+
+1. Run `00_sample_00.in`
+
+  ```bash
+  cat test/in/basic/00_sample_00.in | ./main
+  ```
 
 ## Git Rules
 
