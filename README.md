@@ -112,8 +112,11 @@ tree
 
 ```bash
 go build -o main .
+./main < ./test/in/basic/20_gen_11.in
+./main < ./test/in/basic/60_gen_11.in
+./main < ../test/in/60_gen_11.in > /tmp/60_gen_11_result.txt && diff -u ../test/out/60_gen_11.out /tmp/60_gen_11_result.txt && echo "✓ テスト成功: 差分は0です" || echo "✗ テスト失敗: 差分があります"
 
-for INPUT_FILE in ./test/in/basic/*.in; do echo "--- Running Test Case: ${INPUT_FILE} ---"; ./main < "${INPUT_FILE}"; echo "----------------------------------------"; done
+for FILE_NAME in ./test/in/basic/*.in; do echo "--- Running Test Case: ${FILE_NAME} ---"; ./main < "${FILE_NAME}"; && diff -u ../test/out/; done
 ```
 
 - Result
