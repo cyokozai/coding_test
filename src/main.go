@@ -225,12 +225,13 @@ func calculateFee(durationSec float64, rate int, intervalSec int) int {
 	// 1. 初回加算 (1秒経過時点で発生)
 	count := 1
 	// 2. 2回目以降の加算
-	overSec := durationSec - 1.0
+	if intervalSec > 0 {
+		overSec := durationSec - 1.0
+		additionalCount := int(overSec / float64(intervalSec))
+		count += additionalCount
+	}
 
-	additionalCount := int(overSec / float64(intervalSec))
-	totalCount := count + additionalCount
-
-	return totalCount * rate
+	return count * rate
 }
 
 // ---------- メインロジック ----------
@@ -351,33 +352,6 @@ func handleGetDuration(fields []string, currentTime time.Time) {
 	//    - duration := currentTime.Sub(session.CheckInTime)
 	//    - minutes := int(math.Ceil(duration.Seconds() / 60.0))
 	//    - fmt.Printf("get-duration: %d\n", minutes)
-}
-
-// checkout: {時刻} {利用客 ID} {クーポンの情報}
-func handleCheckout(fields []string, currentTime time.Time) {
-	// userID, _ := strconv.Atoi(fields[2])
-	// numCoupons, _ := strconv.Atoi(fields[3])
-	// couponIDs := []int{}
-	// for i := 0; i < numCoupons; i++ {
-	// 	id, _ := strconv.Atoi(fields[4+i])
-	// 	couponIDs = append(couponIDs, id)
-	// }
-
-	// TODO: ロジック実装 (基本実装では numCoupons == 0)
-	// 1. 料金計算ロジック（別関数に切り出す）
-	//    - calculateSeatFee(session, currentTime)
-	//    - calculateFoodFee(session)
-	//    - totalFee := seatFee + foodFee + session.TotalShowerFee
-	// 2. エラーチェック
-	//    - user存在チェック -> invalid user
-	//    - 精算済みチェック -> already done
-	//    - シャワー利用中チェック -> shower is still in use
-	//    - (応用) クーポンチェック -> invalid coupon
-	// 3. 正常処理
-	//    - fmt.Printf("checkout: %d\n", totalFee)
-	//    - session.Status = UserCheckedOut
-	//    - seat.Status = SeatAvailable (基本実装)
-	//    - seat.UserID = 0
 }
 
 // order-food: {時刻} {座席 ID} {フード ID}
